@@ -9,7 +9,17 @@ const router = express.Router();
 
 router.post("/register", async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const {
+            firstName,
+            lastName,
+            email,
+            password,
+            country,
+            state,
+            whatsapp,
+        } = req.body;
+
+        console.log(req.body); // ✅ Log the incoming data correctly
 
         const existingUser = await User.findOne({ email });
         if (existingUser)
@@ -19,8 +29,13 @@ router.post("/register", async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt);
 
         const newUser = new User({
+            firstName,
+            lastName,
             email,
             password: hashedPassword,
+            whatsapp,
+            country,
+            state,
         });
 
         await newUser.save();
@@ -28,7 +43,7 @@ router.post("/register", async (req, res) => {
     } catch (error) {
         console.error("Registration Error:", error);
         res.status(500).json({ error: "Internal Server Error." });
-    }   
+    }
 });
 
 // Login
@@ -56,6 +71,5 @@ router.post("/login", async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 });
-
 
 module.exports = router;
