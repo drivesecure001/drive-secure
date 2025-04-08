@@ -7,7 +7,7 @@ const rateLimit = require("express-rate-limit");
 
 const authRoutes = require("./routes/auth");
 const profileRoutes = require("./routes/profile");
-const adminRoutes = require ("./routes/admin")
+const adminRoutes = require("./routes/admin");
 
 const app = express();
 
@@ -15,14 +15,13 @@ app.set("trust proxy", 1);
 app.use(express.json());
 app.use(
     cors({
-        origin: ["http://127.0.0.1:5500", "https://therevolveafrica.com"],  // Allow only your frontend
+        origin: ["http://127.0.0.1:5500", "https://vehicleregistration.ng"], // Allow only your frontend
         credentials: true, // Allow cookies or authorization headers
         methods: "GET, POST, PUT, DELETE, OPTIONS",
         allowedHeaders: "Content-Type, Authorization",
     })
 );
 app.use(helmet());
-
 
 // Rate Limiting
 const limiter = rateLimit({
