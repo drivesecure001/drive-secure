@@ -79,7 +79,7 @@ module.exports = {
                 }
 
                 <div style="margin-top: 30px; padding: 15px; background: #e8f4fc; border-radius: 5px;">
-                    <p style="color: #333; font-size: 14px; margin: 0 0 8px 0;">We will review your submission and notify you once it has been processed.</p>
+                    <p style="color: #333; font-size: 14px; margin: 0 0 8px 0;">We will review your submission and notify you 7 days before the expiration of your request.</p>
                     <p style="color: #333; font-size: 14px; margin: 0;">Thank you for using our vehicle registration service!</p>
                 </div>
 
