@@ -1,38 +1,18 @@
+// routes/profile.js
 const express = require("express");
-const multer = require("multer");
-const cloudinary = require("cloudinary");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const dotenv = require("dotenv");
 const authenticateToken = require("../middleware/auth");
 const User = require("../models/User");
+const vehicleController = require("../controller/renualController");
+const { single, array } = require("../middleware/upload");
 
 dotenv.config();
 const router = express.Router();
 
-// Cloudinary configuration
-cloudinary.v2.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-// Multer storage setup for Cloudinary
-const storage = new CloudinaryStorage({
-    cloudinary: cloudinary.v2,
-    params: {
-        folder: "uploads",
-        allowed_formats: ["jpg", "jpeg", "png"],
-    },
-});
-
-const upload = multer({ storage });
-
-
-
 // GET user profile
 router.get("/me", authenticateToken, async (req, res) => {
     try {
-        const user = await User.findById(req.user.userId); // ✅ Fetch by ID instead of email
+        const user = await User.findById(req.user.userId);
         if (!user) {
             return res.status(404).json({ error: "User not found." });
         }
@@ -43,22 +23,23 @@ router.get("/me", authenticateToken, async (req, res) => {
     }
 });
 
-
 // UPDATE profile with image upload
 router.put(
     "/edit",
     authenticateToken,
-    upload.single("profilePicture"),
+    single("profilePicture"), // Use the single file upload middleware
     async (req, res) => {
-        // console.log("Received Data:", req.body); 
-
         try {
-            // console.log("making progress")
             const user = await User.findById(req.user.userId);
-            // console.log(user, "user");
             if (!user) return res.status(404).json({ error: "User not found" });
 
-            Object.assign(user, req.body); // Update user fields
+            // Update profile picture if uploaded
+            if (req.file) {
+                user.profilePicture = req.file.path;
+            }
+
+            // Update other fields
+            Object.assign(user, req.body);
             await user.save();
 
             res.json({ message: "Profile updated successfully", user });
@@ -67,6 +48,18 @@ router.put(
             res.status(500).json({ error: "Server error" });
         }
     }
+);
+
+// Renewal reminder with optional file upload
+router.post(
+    "/reminder",
+    array("documents", 10),
+    (req, res, next) => {
+        console.log("req.files:", req.files);
+        console.log("req.body:", req.body);
+        next();
+    },
+    vehicleController.registerVehicle
 );
 
 module.exports = router;
