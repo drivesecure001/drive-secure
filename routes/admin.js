@@ -6,7 +6,10 @@ const TempAdmin = require("../models/TempAdmin");
 const Admin = require("../models/Admin");
 const { sendOTP } = require("../utils/nodemailer");
 const User = require("../models/User");
+const User2 = require("../models/RenewalUser");
 const adminToken = require("../middleware/adminAuth");
+
+const { single, array } = require("../middleware/upload");
 
 const router = express.Router();
 
@@ -111,7 +114,7 @@ router.post("/login", async (req, res) => {
 router.get("/profile", adminToken, async (req, res) => {
     try {
         const admin = await Admin.findById(req.admin.id).select(
-            "firstName lastName email"
+            "-password"
         );
 
         if (!admin) return res.status(404).json({ msg: "Admin not found" });
@@ -123,13 +126,59 @@ router.get("/profile", adminToken, async (req, res) => {
     }
 });
 
+
+router.put("/edit", adminToken, single("profilePicture"), async (req, res) => {
+    try {
+        // Changed from req.user.userId to req.admin.id
+        const admin = await Admin.findById(req.admin.id);
+        if (!admin) return res.status(404).json({ error: "Admin not found" });
+
+        // Update profile picture if uploaded
+        if (req.file) {
+            admin.profilePicture = req.file.path;
+        }
+
+        // Update other fields
+        Object.assign(admin, req.body);
+        await admin.save();
+
+        res.json({ message: "Profile updated successfully", admin });
+    } catch (error) {
+        console.error("Error updating profile:", error);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
 router.get("/users", adminToken, async (req, res) => {
     try {
-        const users = await User.find({}, "name username email phone location");
+        const { search } = req.query;
+        let query = {};
+
+        if (search) {
+            // Check if search term is a valid ObjectId
+            const isObjectId = /^[0-9a-fA-F]{24}$/.test(search);
+            
+            query = {
+                $or: [
+                    // Only include _id search if it's a valid ObjectId
+                    ...(isObjectId ? [{ _id: search }] : []),
+                    { email: { $regex: search, $options: "i" } },
+                    // Add other searchable fields as needed
+                    { firstName: { $regex: search, $options: "i" } },
+                    { lastName: { $regex: search, $options: "i" } },
+                    { whatsapp: { $regex: search, $options: "i" } }
+                ]
+            };
+        }
+
+        const users = await User.find(query, "-password");
         res.json(users);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ msg: "Internal server error" });
+        res.status(500).json({ 
+            msg: "Internal server error",
+            error: error.message 
+        });
     }
 });
 
@@ -142,6 +191,16 @@ router.get("/users/:id", adminToken, async (req, res) => {
     } catch (error) {
         console.error("Error fetching user:", error);
         res.status(500).json({ error: "Error fetching user details" });
+    }
+});
+router.delete("/users/:id", adminToken, async (req, res) => {
+    try {
+        const deleted = await User.findByIdAndDelete(req.params.id);
+        if (!deleted)
+            return res.status(404).json({ message: "User not found" });
+        res.status(200).json({ message: "User deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ message: "Error deleting user", error });
     }
 });
 module.exports = router;
