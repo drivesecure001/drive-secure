@@ -13,11 +13,13 @@ const router = express.Router();
 router.post("/register", async (req, res) => {
     // console.log("Received request:", req.body); // Debugging log
 
-    const { name, email, password } = req.body;
-    if (!name || !email || !password) {
+    const { firstName, lastName, email, password, whatsapp, country, state } =
+        req.body;
+
+    if (!firstName || !lastName || !email || !password) {
         return res.status(400).json({ msg: "All fields are required" });
     }
-
+    console.log(req.body);
     const existingAdmin = await Admin.findOne({ email });
     const existingAdmin2 = await TempAdmin.findOne({ email });
 
@@ -31,9 +33,13 @@ router.post("/register", async (req, res) => {
         console.log(otp);
         const hashedPassword = await bcrypt.hash(password, 10);
         const newAdmin = new TempAdmin({
-            name,
+            firstName,
+            lastName,
             email,
             password: hashedPassword,
+            whatsapp,
+            country,
+            state,
             otp,
             otpExpires,
         });
@@ -57,15 +63,22 @@ router.post("/verify-otp", async (req, res) => {
             otp,
             otpExpires: { $gt: new Date() },
         });
-        if (!tempAdmin)
+        if (!tempAdmin) {
+            console.log("OTP not found or expired");
             return res.status(400).json({ msg: "Invalid or expired OTP" });
+        }
 
         // Move verified admin to `Admin` collection
         const newAdmin = new Admin({
-            name: tempAdmin.name,
+            firstName: tempAdmin.firstName,
+            lastName: tempAdmin.lastName,
             email: tempAdmin.email,
             password: tempAdmin.password,
+            whatsapp: tempAdmin.whatsapp,
+            country: tempAdmin.country,
+            state: tempAdmin.state,
         });
+
         await newAdmin.save();
 
         // Delete admin from `TempAdmin` after verification
@@ -73,7 +86,7 @@ router.post("/verify-otp", async (req, res) => {
 
         res.json({ msg: "Account verified successfully!" });
     } catch (error) {
-        console.error(error);
+        console.error("Error verifying OTP:", error);
         res.status(500).json({ msg: "Internal server error" });
     }
 });
@@ -97,7 +110,10 @@ router.post("/login", async (req, res) => {
 
 router.get("/profile", adminToken, async (req, res) => {
     try {
-        const admin = await Admin.findById(req.admin.id).select("name email");
+        const admin = await Admin.findById(req.admin.id).select(
+            "firstName lastName email"
+        );
+
         if (!admin) return res.status(404).json({ msg: "Admin not found" });
 
         res.json(admin);
@@ -117,7 +133,7 @@ router.get("/users", adminToken, async (req, res) => {
     }
 });
 
-router.get("/users/:id", async (req, res) => {
+router.get("/users/:id", adminToken, async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ error: "User not found" });
