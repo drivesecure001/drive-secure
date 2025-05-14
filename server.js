@@ -8,6 +8,7 @@ const rateLimit = require("express-rate-limit");
 const authRoutes = require("./routes/auth");
 const profileRoutes = require("./routes/profile");
 const adminRoutes = require("./routes/admin");
+const adminRoutesRenewal = require("./routes/adminRenewalUsers");
 
 const app = express();
 
@@ -41,6 +42,7 @@ mongoose
 app.use("/auth", authRoutes);
 app.use("/profile", profileRoutes);
 app.use("/admin", adminRoutes);
+app.use("/admin-renewal", adminRoutesRenewal);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
