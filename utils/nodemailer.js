@@ -58,10 +58,10 @@ const sendOTP = async (email, otp) => {
 const sendEmail = async (to, subject, htmlBody) => {
     try {
         const mailOptions = {
-            from: `"Drive Secure" <${process.env.EMAIL_USER}>`, // Sender address
-            to: to, // List of receivers
-            subject: subject, // Subject line
-            html: htmlBody, // HTML body
+            from: `"Drive Secure" <${process.env.EMAIL_USER}>`, 
+            to: to, 
+            subject: subject, 
+            html: htmlBody, 
         };
 
         await transporter.sendMail(mailOptions);
@@ -72,4 +72,4 @@ const sendEmail = async (to, subject, htmlBody) => {
     }
 };
 
-module.exports = { sendEmail, sendOTP }; // Ensure this is exported
+module.exports = { sendEmail, sendOTP }; 

@@ -1,4 +1,3 @@
-// middleware/authenticateTrigger.js
 const TRIGGER_SECRET = process.env.RENEWAL_TRIGGER_SECRET;
 
 if (!TRIGGER_SECRET) {
@@ -11,7 +10,6 @@ const authenticateTrigger = (req, res, next) => {
     const providedSecret = req.headers["x-trigger-secret"];
 
     if (!TRIGGER_SECRET) {
-        // Fail safe if secret is not configured on server
         console.error(
             "Trigger authentication cannot proceed: RENEWAL_TRIGGER_SECRET is not configured."
         );
@@ -21,7 +19,7 @@ const authenticateTrigger = (req, res, next) => {
     }
 
     if (providedSecret && providedSecret === TRIGGER_SECRET) {
-        next(); // Authorized
+        next(); 
     } else {
         console.warn("Unauthorized attempt to trigger renewal checks.");
         res.status(403).json({

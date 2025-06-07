@@ -66,7 +66,6 @@ const registerVehicle = async (req, res) => {
 
         await user.save();
 
-        // Send confirmation email
         // Send confirmation email to user
         const userMailOptions = {
             from: `"Drive Secure" <${process.env.EMAIL_USER}>`,
@@ -88,7 +87,6 @@ const registerVehicle = async (req, res) => {
             ),
         };
 
-        // Send both emails in parallel
         await Promise.all([
             transporter.sendMail(userMailOptions),
             transporter.sendMail(adminMailOptions),
@@ -121,17 +119,16 @@ const checkAndSendRenewalReminders = async () => {
     console.log("Starting checkAndSendRenewalReminders process...");
     try {
         const today = new Date();
-        today.setHours(0, 0, 0, 0); // Normalize to the beginning of the day
+        today.setHours(0, 0, 0, 0); 
 
         const sevenDaysFromNow = new Date(today);
         sevenDaysFromNow.setDate(today.getDate() + 7);
-        sevenDaysFromNow.setHours(0, 0, 0, 0); // Normalize
+        sevenDaysFromNow.setHours(0, 0, 0, 0);
 
         console.log(
             `Checking for renewals expiring on: ${sevenDaysFromNow.toDateString()}`
         );
 
-        // Find all users. For very large databases, consider batching or more targeted queries.
         const users = await User.find({});
 
         if (!users || users.length === 0) {
@@ -142,13 +139,12 @@ const checkAndSendRenewalReminders = async () => {
         let emailsSentCount = 0;
         for (const user of users) {
             if (!user.renewals || user.renewals.length === 0) {
-                continue; // Skip users with no renewals
+                continue; 
             }
 
             const upcomingExpiries = [];
 
             for (const renewal of user.renewals) {
-                // Helper function to compare dates (ignoring time)
                 const isDateSevenDaysFromNow = (expiryDate) => {
                     if (!expiryDate) return false;
                     const normalizedExpiryDate = new Date(expiryDate);
@@ -195,7 +191,6 @@ const checkAndSendRenewalReminders = async () => {
             if (upcomingExpiries.length > 0) {
                 const subject = "Important: Your Vehicle Renewal is Due Soon!";
 
-                // Start with the main container and header
                 let emailBody = `
                     <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 20px auto; background-color: #f8f8f8; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
                         <div style="background-color: #007bff; color: #ffffff; padding: 25px 30px; text-align: center; border-top-left-radius: 8px; border-top-right-radius: 8px;">
@@ -211,7 +206,6 @@ const checkAndSendRenewalReminders = async () => {
                                 <ul style="list-style: none; padding: 0; margin: 0;">
                 `;
 
-                // Add each expiring item dynamically
                 upcomingExpiries.forEach((expiry) => {
                     emailBody += `
                                     <li style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
@@ -236,7 +230,6 @@ const checkAndSendRenewalReminders = async () => {
                     `;
                 });
 
-                // Close the list and add the call to action and footer
                 emailBody += `
                                 </ul>
                             </div>
@@ -244,7 +237,7 @@ const checkAndSendRenewalReminders = async () => {
                                 Please log in to your Drive Secure account at your earliest convenience to review these items and take the necessary actions to avoid any service interruptions or penalties.
                             </p>
                             <div style="text-align: center; margin-top: 30px; margin-bottom: 30px;">
-                                <a href="YOUR_LOGIN_PAGE_URL" style="display: inline-block; padding: 12px 25px; background-color: #28a745; color: #ffffff; text-decoration: none; border-radius: 5px; font-size: 17px; font-weight: bold;">
+                                <a href="https://vehicleregistration.ng/client/login/" style="display: inline-block; padding: 12px 25px; background-color: #28a745; color: #ffffff; text-decoration: none; border-radius: 5px; font-size: 17px; font-weight: bold;">
                                     Log In to Your Account
                                 </a>
                             </div>
@@ -270,7 +263,6 @@ const checkAndSendRenewalReminders = async () => {
                         `Failed to send email to ${user.email}:`,
                         emailError
                     );
-                    // Decide if you want to stop the whole process or continue
                 }
             }
         }
@@ -285,7 +277,6 @@ const checkAndSendRenewalReminders = async () => {
     }
 };
 
-// Controller function to be called by the route
 const triggerRenewalChecks = (req, res) => {
     console.log("Received HTTP request to trigger renewal checks.");
 
@@ -304,6 +295,6 @@ const triggerRenewalChecks = (req, res) => {
 
 module.exports = {
     registerVehicle,
-    checkAndSendRenewalReminders, // Export if you want to call it directly elsewhere (e.g., a true cron)
+    checkAndSendRenewalReminders, 
     triggerRenewalChecks,
 };
