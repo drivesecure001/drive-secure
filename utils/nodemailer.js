@@ -43,5 +43,22 @@ const sendOTP = async (email, otp) => {
         html: htmlContent,
     });
 };
+const sendEmail = async (to, subject, htmlBody) => {
+    try {
+        const mailOptions = {
+            from: `"Your Car Villa" <${process.env.EMAIL_USER}>`, // Sender address
+            to: to, // List of receivers
+            subject: subject, // Subject line
+            html: htmlBody, // HTML body
+        };
 
+        await transporter.sendMail(mailOptions);
+        console.log(`Email sent successfully to ${to}`);
+    } catch (error) {
+        console.error(`Error sending email to ${to}:`, error);
+        throw error;
+    }
+};
+
+module.exports = { sendEmail }; // Ensure this is exported
 module.exports = { sendOTP };
