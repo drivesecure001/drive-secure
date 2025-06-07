@@ -2,8 +2,8 @@ const User = require("../models/RenewalUser");
 const transporter = require("../config/mailer");
 const emailTemplate = require("../utils/emailTemplate");
 const { Types } = require("mongoose");
-const { sendEmail } = require("../utils/nodemailers");
-exports.registerVehicle = async (req, res) => {
+const { sendEmail } = require("../utils/nodemailer");
+const registerVehicle = async (req, res) => {
     try {
         const {
             fullName,
@@ -31,18 +31,18 @@ exports.registerVehicle = async (req, res) => {
         }
 
         // Process uploaded documents
-       const documents = Array.isArray(req.files)
-           ? req.files.map((file) => ({
-                 url: file.path,
-                 publicId: file.filename,
-                 documentType: file.mimetype.startsWith("image")
-                     ? "image"
-                     : file.mimetype === "application/pdf"
-                     ? "pdf"
-                     : "doc",
-             }))
-           : [];
-        
+        const documents = Array.isArray(req.files)
+            ? req.files.map((file) => ({
+                  url: file.path,
+                  publicId: file.filename,
+                  documentType: file.mimetype.startsWith("image")
+                      ? "image"
+                      : file.mimetype === "application/pdf"
+                      ? "pdf"
+                      : "doc",
+              }))
+            : [];
+
         // Create new renewal record
         const newRenewal = {
             _id: new Types.ObjectId(),
@@ -257,6 +257,7 @@ const triggerRenewalChecks = (req, res) => {
 };
 
 module.exports = {
+    registerVehicle,
     checkAndSendRenewalReminders, // Export if you want to call it directly elsewhere (e.g., a true cron)
     triggerRenewalChecks,
 };

@@ -60,5 +60,4 @@ const sendEmail = async (to, subject, htmlBody) => {
     }
 };
 
-module.exports = { sendEmail }; // Ensure this is exported
-module.exports = { sendOTP };
+module.exports = { sendEmail, sendOTP }; // Ensure this is exported
