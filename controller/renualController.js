@@ -193,24 +193,71 @@ const checkAndSendRenewalReminders = async () => {
             }
 
             if (upcomingExpiries.length > 0) {
-                const subject = "Upcoming Renewal Reminder from Car Villa";
-                let emailBody = `<p>Dear ${user.fullName},</p>`;
-                emailBody +=
-                    "<p>This is a friendly reminder from Car Villa that the following item(s) are due for renewal in 7 days:</p><ul>";
+                const subject = "Important: Your Vehicle Renewal is Due Soon!";
 
+                // Start with the main container and header
+                let emailBody = `
+                    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 20px auto; background-color: #f8f8f8; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                        <div style="background-color: #007bff; color: #ffffff; padding: 25px 30px; text-align: center; border-top-left-radius: 8px; border-top-right-radius: 8px;">
+                            <h1 style="margin: 0; font-size: 28px; font-weight: 600;">Drive Secure</h1>
+                            <p style="margin: 5px 0 0; font-size: 16px;">Your Trusted Vehicle Companion</p>
+                        </div>
+                        <div style="padding: 30px;">
+                            <p style="font-size: 16px; margin-bottom: 20px;">Dear <strong>${user.fullName}</strong>,</p>
+                            <p style="font-size: 16px; margin-bottom: 25px;">
+                                This is an important heads-up from **Drive Secure**! The following item(s) related to your vehicle(s) are due for renewal in <strong>7 days</strong>:
+                            </p>
+                            <div style="background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 20px 25px; margin-bottom: 25px;">
+                                <ul style="list-style: none; padding: 0; margin: 0;">
+                `;
+
+                // Add each expiring item dynamically
                 upcomingExpiries.forEach((expiry) => {
-                    emailBody += `<li><strong>${
-                        expiry.type
-                    }</strong> for vehicle registration <strong>${
-                        expiry.registrationNumber
-                    }</strong> (expiring on ${new Date(
-                        expiry.date
-                    ).toLocaleDateString()})</li>`;
+                    emailBody += `
+                                    <li style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
+                                        <p style="font-size: 15px; margin: 0;">
+                                            <strong style="color: #007bff;">${
+                                                expiry.type
+                                            }</strong> for vehicle registration 
+                                            <strong style="color: #555;">${
+                                                expiry.registrationNumber
+                                            }</strong>
+                                        </p>
+                                        <p style="font-size: 14px; color: #777; margin: 5px 0 0;">
+                                            Expiring on: <strong>${new Date(
+                                                expiry.date
+                                            ).toLocaleDateString("en-US", {
+                                                year: "numeric",
+                                                month: "long",
+                                                day: "numeric",
+                                            })}</strong>
+                                        </p>
+                                    </li>
+                    `;
                 });
 
-                emailBody +=
-                    "</ul><p>Please log in to your Car Villa account to take the necessary actions.</p>";
-                emailBody += "<p>Thank you,<br/>The Car Villa Team</p>";
+                // Close the list and add the call to action and footer
+                emailBody += `
+                                </ul>
+                            </div>
+                            <p style="font-size: 16px; margin-bottom: 25px;">
+                                Please log in to your Drive Secure account at your earliest convenience to review these items and take the necessary actions to avoid any service interruptions or penalties.
+                            </p>
+                            <div style="text-align: center; margin-top: 30px; margin-bottom: 30px;">
+                                <a href="YOUR_LOGIN_PAGE_URL" style="display: inline-block; padding: 12px 25px; background-color: #28a745; color: #ffffff; text-decoration: none; border-radius: 5px; font-size: 17px; font-weight: bold;">
+                                    Log In to Your Account
+                                </a>
+                            </div>
+                            <p style="font-size: 15px; margin-bottom: 10px;">Thank you for choosing Drive Secure!</p>
+                            <p style="font-size: 15px; margin-bottom: 0;">Best regards,</p>
+                            <p style="font-size: 15px; margin-top: 0; color: #007bff;">The Drive Secure Team</p>
+                        </div>
+                        <div style="background-color: #f1f1f1; padding: 20px; text-align: center; font-size: 12px; color: #888; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
+                            <p style="margin: 0;">&copy; ${new Date().getFullYear()} Drive Secure. All rights reserved.</p>
+                            <p style="margin: 5px 0 0;">This is an automated email, please do not reply.</p>
+                        </div>
+                    </div>
+                `;
 
                 try {
                     await sendEmail(user.email, subject, emailBody);

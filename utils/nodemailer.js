@@ -9,17 +9,17 @@ const transporter = nodemailer.createTransport({
         user: process.env.EMAIL,
         pass: process.env.EMAIL_PASS,
     },
-    logger: true,
-    debug: true,
+    // logger: true,
+    // debug: true,
 });
 
-transporter.verify(function (error, success) {
-    if (error) {
-        console.log("SMTP connection verification failed:", error);
-    } else {
-        console.log("SMTP server is ready to take our messages!");
-    }
-});
+// transporter.verify(function (error, success) {
+//     if (error) {
+//         console.log("SMTP connection verification failed:", error);
+//     } else {
+//         console.log("SMTP server is ready to take our messages!");
+//     }
+// });
 
 const sendOTP = async (email, otp) => {
     const htmlContent = `
@@ -58,7 +58,7 @@ const sendOTP = async (email, otp) => {
 const sendEmail = async (to, subject, htmlBody) => {
     try {
         const mailOptions = {
-            from: `"Your Car Villa" <${process.env.EMAIL_USER}>`, // Sender address
+            from: `"Drive Secure" <${process.env.EMAIL_USER}>`, // Sender address
             to: to, // List of receivers
             subject: subject, // Subject line
             html: htmlBody, // HTML body
