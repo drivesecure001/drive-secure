@@ -4,14 +4,21 @@ require("dotenv").config();
 const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: process.env.EMAIL_PORT,
-    secure: true,
+    secure: false,
     auth: {
         user: process.env.EMAIL,
         pass: process.env.EMAIL_PASS,
     },
-    tls: {
-        rejectUnauthorized: false,
-    },
+    logger: true,
+    debug: true,
+});
+
+transporter.verify(function (error, success) {
+    if (error) {
+        console.log("SMTP connection verification failed:", error);
+    } else {
+        console.log("SMTP server is ready to take our messages!");
+    }
 });
 
 const sendOTP = async (email, otp) => {
