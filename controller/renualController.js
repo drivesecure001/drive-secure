@@ -132,7 +132,7 @@ const checkAndSendRenewalReminders = async () => {
         );
 
         // Find all users. For very large databases, consider batching or more targeted queries.
-        const users = await RenewalUser.find({});
+        const users = await User.find({});
 
         if (!users || users.length === 0) {
             console.log("No users found for renewal checks.");
@@ -242,8 +242,7 @@ const checkAndSendRenewalReminders = async () => {
 const triggerRenewalChecks = (req, res) => {
     console.log("Received HTTP request to trigger renewal checks.");
 
-    // Run the function in the background, don't await it here
-    // so the HTTP response is sent immediately.
+    
     checkAndSendRenewalReminders().catch((err) => {
         console.error(
             "Unhandled error from background renewal check initiated by HTTP request:",
